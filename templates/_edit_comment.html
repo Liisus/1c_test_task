@@ -1,0 +1,10 @@
+<details class="mt-2">
+  <summary class="btn btn-sm btn-outline-secondary">Изменить комментарий</summary>
+  <form method="get" action="{{ url_for('main.edit_comment', comment_id=comment.id) }}" class="mt-3" data-draft-key="comment-edit-{{ comment.id }}">
+    <div class="form-group">
+      <label for="edit-comment-body-{{ comment.id }}">Текст комментария #{{ comment.id }}</label>
+      <textarea class="form-control" id="edit-comment-body-{{ comment.id }}" name="body" rows="3" required>{{ comment.body }}</textarea>
+    </div>
+    <button type="submit" class="btn btn-sm btn-success">Сохранить изменения</button>
+  </form>
+</details>

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="card border-0 shadow-sm" aria-labelledby="page-title">
+    <div class="card-body p-4 p-md-5">
+      <h1 class="h2" id="page-title">Дневник обещаний</h1>
+      {% include "_add_case.html" %}
+      <form method="get" action="{{ url_for('main.index') }}" class="my-4 p-3 p-md-4 bg-light border rounded">
+        <div class="row">
+          <div class="col-md-8">
+            <label for="q" class="form-label">Поиск по названию и описанию</label>
+            <input type="search" class="form-control" id="q" name="q" value="{{ q }}">
+          </div>
+          <div class="col-md-4">
+            <label for="status" class="form-label">Статус</label>
+            <select class="custom-select" id="status" name="status">
+              <option value="" {% if not filters.status %}selected{% endif %}>Все</option>
+              <option value="open" {% if filters.status == 'open' %}selected{% endif %}>Открыто</option>
+              <option value="closed" {% if filters.status == 'closed' %}selected{% endif %}>Закрыто</option>
+            </select>
+          </div>
+          <fieldset class="col-md-6">
+            <legend class="h6">Дата обещания</legend>
+            <div class="row">
+              <div class="col-sm-6">
+                <label for="promised_from" class="form-label">С</label>
+                <input type="date" class="form-control" id="promised_from" name="promised_from" value="{{ filters.promised_from or '' }}">
+              </div>
+              <div class="col-sm-6">
+                <label for="promised_to" class="form-label">По</label>
+                <input type="date" class="form-control" id="promised_to" name="promised_to" value="{{ filters.promised_to or '' }}">
+              </div>
+            </div>
+          </fieldset>
+          <fieldset class="col-md-6">
+            <legend class="h6">Срок завершения</legend>
+            <div class="row">
+              <div class="col-sm-6">
+                <label for="due_from" class="form-label">С</label>
+                <input type="date" class="form-control" id="due_from" name="due_from" value="{{ filters.due_from or '' }}">
+              </div>
+              <div class="col-sm-6">
+                <label for="due_to" class="form-label">По</label>
+                <input type="date" class="form-control" id="due_to" name="due_to" value="{{ filters.due_to or '' }}">
+              </div>
+            </div>
+          </fieldset>
+          <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-primary mr-2">Найти</button>
+            <a class="btn btn-outline-secondary" href="{{ url_for('main.index') }}">Сбросить</a>
+          </div>
+        </div>
+      </form>
+      <p class="text-secondary">Найдено дел: {{ cases | length }}</p>
+      {% if cases %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th scope="col">Дело</th>
+                <th scope="col">Дата обещания</th>
+                <th scope="col">Срок завершения</th>
+                <th scope="col">Статус</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for case in cases %}
+                <tr id="case-{{ case.id }}" data-case-id="{{ case.id }}">
+                  <td>
+                    <span class="text-secondary">#{{ case.id }}</span> {{ case.title }}
+                    <p class="text-secondary mb-0">{{ case.description }}</p>
+                    {% include "_edit_case.html" %}
+                    {% include "_case_comments.html" %}
+                  </td>
+                  <td class="text-nowrap">{{ case.promised_on }}</td>
+                  <td class="text-nowrap">{{ case.due_on }}</td>
+                  <td>
+                    <span class="badge badge-pill {{ 'badge-secondary' if case.status == 'closed' else 'badge-success' }}">{{ 'Закрыто' if case.status == 'closed' else 'Открыто' }}</span>
+                    {% if case.status == 'open' %}
+                      <form method="get" action="{{ url_for('main.edit_case', case_id=case.id) }}" class="mt-2">
+                        <input type="hidden" name="status" value="closed">
+                        <button type="submit" class="btn btn-sm btn-outline-secondary">Закрыть</button>
+                      </form>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="text-center py-5 bg-light rounded">
+          <p class="font-weight-bold mb-1">Дела не найдены</p>
+          <p class="text-secondary mb-0">Попробуйте изменить условия поиска или сбросить фильтры.</p>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}
